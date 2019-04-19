@@ -111,39 +111,39 @@ def commentary( largestDiff = 0 , prevSwap = None , prevLeader = None):
             curLeader = 1
         else:
             curLeader = None
-    #get current difference
-    curDiff = abs( score1 - score0 )
+        #get current difference
+        curDiff = abs( score1 - score0 )
     
-    #figure out if double swap
-    curSwap = isSwap( score0 , score1)
-    doubleSwap = prevSwap and curSwap
+        #figure out if double swap
+        curSwap = is_swap( score0 , score1)
+        doubleSwap = prevSwap and curSwap
     
-    #print stuff
-    if( doubleSwap ):
-        print("We got another swap!")
-    elif( curSwap ):
-        print( "We got a swap! " )
-    # else nothing
+        #print stuff
+        if( doubleSwap ):
+            print("We got another swap!")
+        elif( curSwap ):
+            print("We got a swap!")
+        #  else nothing
 
-    #leader stuff
-    if(prevLeader != None and curLeader != None):
-        if( prevLeader != curLeader):
-            print("The Tables have Turned!")
-            if( curLeader == 0):
-                print("player0 takes the lead!")
-            else:
-                print("player1 takes the lead!")
+        #leader stuff
+        if(prevLeader != None and curLeader != None):
+            if( prevLeader != curLeader):
+                print("The Tables have Turned!")
+                if( curLeader == 0):
+                    print("player0 takes the lead!")
+                else:
+                    print("player1 takes the lead!")
 
-    #largest lead
-    if( curDiff > largestDiff ):
-        print("the leader is pulling away with the largest lead yet!")
-        print( curLead )
-        largestDiff = curDiff
-
-    return commentary( largestDiff , curSwap , curLeader )
+        #largest lead
+        #if( curDiff > largestDiff ):
+        #    print("the leader is pulling away with the largest lead yet!")
+        #    print( curLead )
+        #    largestDiff = curDiff
+        return commentary( largestDiff , curSwap , curLeader )
+    return say
 
 def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
-         goal=GOAL_SCORE, say = commentary):#announce_lead_changes()): #= announce_lead_changes ):
+         goal=GOAL_SCORE, say = silence):   #commentary):#announce_lead_changes()): #= announce_lead_changes ):
     """Simulate a game and return the final scores of both players, with Player
     0's score first, and Player 1's score second.
 
@@ -258,13 +258,13 @@ def announce_highest(who, previous_high=0, previous_score=0):
         """function that implements the correct print statements
         >>> who = 1
         >>> print_stuff( 1 ):
-        1 Point! That's the biggest gain yet for Player 1
+        1 point! That's the biggest gain yet for Player 1
         >>> who = 0
         >>> print_stuff( 20 ):
-        20 Points! That's the biggest gain yet for Player 0
+        20 points! That's the biggest gain yet for Player 0
         """
         if( point_change == 1):
-            point_comment = "1 Point!"
+            point_comment = "1 point!"
         else:
             point_comment = str(point_change) + " points!"
         print( point_comment + " That's the biggest gain yet for Player " + str(who) ) 
@@ -292,30 +292,13 @@ def announce_highest(who, previous_high=0, previous_score=0):
         #print if current difference is higher than previous
         if( cur_diff > previous_high):
             print_stuff( cur_diff )
-
-        #toggle and return announce_highest...
-        return_other_high , return_other_score = other_previous_high , other_previous_score
-        other_previous_high, other_previous_score = previous_high, previous_score
-        return announce_highest( (who + 1)%2 , return_other_high , return_other_score)
-    
-
+            
+        cur_high = max( cur_diff , previous_high)
+        return announce_highest( who , cur_high , cur_score)
 
     return say
-
-
-
-
-
-
-
-
-
-
-
-
 
  
-    return say
     # END PROBLEM 7
 
 
@@ -354,7 +337,13 @@ def make_averaged(fn, num_samples=1000):
     3.0
     """
     # BEGIN PROBLEM 8
-    "*** YOUR CODE HERE ***"
+    def get_average( *args ):
+        sum,k = 0 , 0
+        while( k < num_samples):
+            sum, k = sum + fn( *args ), k + 1
+        return sum/num_samples
+
+    return get_average
     # END PROBLEM 8
 
 
@@ -368,7 +357,15 @@ def max_scoring_num_rolls(dice=six_sided, num_samples=1000):
     1
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    max , max_num_dice , n = 0 , 1 , 1
+    while(n <= 10):
+        roll_average = make_averaged(roll_dice,1000)
+        cur_roll_average = roll_average(n, dice)
+        if(cur_roll_average > max):
+            max = cur_roll_average
+            max_num_dice = n
+        n += 1
+    return max_num_dice
     # END PROBLEM 9
 
 
@@ -417,7 +414,11 @@ def bacon_strategy(score, opponent_score, margin=8, num_rolls=4):
     rolls NUM_ROLLS otherwise.
     """
     # BEGIN PROBLEM 10
-    return 4  # Replace this statement
+    free_bacon = 2 + abs( (opponent_score//10) - (opponent_score%10) ) 
+    if( free_bacon >= margin ):
+        return 0
+    else:
+        return num_rolls
     # END PROBLEM 10
 
 
@@ -427,7 +428,13 @@ def swap_strategy(score, opponent_score, margin=8, num_rolls=4):
     NUM_ROLLS.
     """
     # BEGIN PROBLEM 11
-    return 4  # Replace this statement
+    free_bacon = 2 + abs( (opponent_score//10) - (opponent_score%10) )
+    bacon_score = score + free_bacon
+
+    # check that score is smaller and would give larger score
+    if( bacon_score < opponent_score and opponent_score % bacon_score == 0):
+        return 0
+    return bacon_strategy(score, opponent_score, margin, num_rolls) 
     # END PROBLEM 11
 
 
